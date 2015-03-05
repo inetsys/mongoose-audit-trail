@@ -1,0 +1,30 @@
+{
+  "name": "mongoose-audit-trail",
+  "version": "0.0.1",
+  "description": "Audit-trail for mongoose models.",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/llafuente/mongoose-audit-trail"
+  },
+  "homepage": "https://github.com/llafuente/mongoose-audit-trail",
+  "scripts": {
+    "docr": "docr ./index.js --intro --append TODO --append LICENSE > README.md"
+  },
+  "keywords": [
+    "mongoose",
+    "plugin",
+    "audit",
+    "version"
+  ],
+  "author": {
+    "name": "Luis Lafuente Morales",
+    "email": "llafuente@noboxout.com",
+    "url": "https://www.noboxout.com/"
+  },
+  "licence": "MIT",
+  "dependencies": {
+    "mongoose-timestamp": "^0.4.0",
+    "deep-diff": "^0.3.0"
+  }
+}
