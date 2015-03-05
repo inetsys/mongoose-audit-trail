@@ -35,8 +35,9 @@
 *
 * ```js
 * audit(Schema, {
-*   modelName: "MyModelName",
-*   userName: 'UserModelName',
+*   modelName: "model_name",
+*   userName: "user_model_name",
+*   collection: "collection_audit",
 *   labelCallback: function(path, doc) {
 *     return path.toUpperCase();
 *   },
@@ -75,19 +76,23 @@ module.exports = function (schema, options) {
       rhs: String
     };
 
-    if (options.labelCallback) {
-      schema_obj.label = String;
-    }
+  if (options.labelCallback) {
+    schema_obj.label = String;
+  }
 
-    if (options.typeCallback) {
-      schema_obj.type = String;
-    }
+  if (options.typeCallback) {
+    schema_obj.type = String;
+  }
 
-    if (options.userCallback && modelUser) {
-      schema_obj.user = {type: mongoose.Schema.Types.ObjectId, ref: modelUser};
-    }
+  if (options.userCallback && modelUser) {
+    schema_obj.user = {type: mongoose.Schema.Types.ObjectId, ref: modelUser};
+  }
 
-  var auditSchema = new mongoose.Schema(schema_obj);
+  var schema_options = {};
+  if (options.collection) {
+    schema_options.collection = options.collection;
+  }
+  var auditSchema = new mongoose.Schema(schema_obj, schema_options);
 
   auditSchema.plugin(timestamps, {
     createdAt: 'created_at',
@@ -111,10 +116,15 @@ module.exports = function (schema, options) {
    * @param {Function} callback (err, result_arr)
    */
   function getAudit(callback) {
-    var model = getModel(this.db),
-      filter = {};
+    var model = getModel(this.db);
 
-    return model.find(filter, function (err, result) {
+    var query = model.find({});
+
+    if (options.userCallback) {
+      query = query.populate("user");
+    }
+
+    return query.exec(function (err, result) {
       callback(err, result);
     });
   }
@@ -126,12 +136,17 @@ module.exports = function (schema, options) {
   * @param {Function} callback (err, result_arr)
   */
   function getAuditVersion(v, callback) {
-    var model = getModel(this.db),
-      filter = {
-        src__v: v
-      };
+    var model = getModel(this.db);
 
-    return model.find(filter, function (err, result) {
+    var query = model.find({
+      src__v: v
+    });
+
+    if (options.userCallback) {
+      query = query.populate("user");
+    }
+
+    return query.exec(function (err, result) {
       callback(err, result);
     });
   }
@@ -147,12 +162,17 @@ module.exports = function (schema, options) {
     var a = Math.min(v1 , v2);
     var b = Math.max(v1 , v2);
 
-    var model = getModel(this.db),
-      filter = {
-        src__v: {"$gte": a, "$lt": b}
-      };
+    var model = getModel(this.db);
 
-    return model.find(filter, function (err, result) {
+    var query = model.find({
+      src__v: {"$gte": a, "$lt": b}
+    });
+
+    if (options.userCallback) {
+      query = query.populate("user");
+    }
+
+    return query.exec(function (err, result) {
       callback(err, result);
     });
   }

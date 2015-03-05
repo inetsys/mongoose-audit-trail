@@ -35,8 +35,9 @@ options object:
 
 ```js
  audit(Schema, {
-   modelName: "MyModelName",
-   userName: 'UserModelName',
+   modelName: "model_name",
+   userName: "user_model_name",
+   collection: "collection_audit",
    labelCallback: function(path, doc) {
      return path.toUpperCase();
    },
