@@ -4,6 +4,8 @@
 Record any field change made to a mongoose model,
 manually, do not use pre/post hooks.
 
+Tested with mongoose 3.8.x
+
 Instance Methods added to the original schema:
 * getAudit
 * getAuditVersion
@@ -13,38 +15,38 @@ Instance Methods added to the original schema:
 
 options object:
 ```js
-{
-mongoose: require("mongoose"), // moongoose instance
-modelName: String,
-// add a label based on the object path
-// maybe your model change over time, this will keep a readable
-// path for users in your schema
-labelCallback: Function, // (path, doc) -> String
-// variable type of the changed. Useful for Date vs String
-typeCallback: Function, // (path, doc) -> String
-// user model to ref in the audit schema
-modelUser: String,
-// how to obtain the user that edited
-userCallback: Function // (path, doc) -> User
-}
+ {
+   mongoose: require("mongoose"), // moongoose instance
+   modelName: String,
+   // add a label based on the object path
+   // maybe your model change over time, this will keep a readable
+   // path for users in your schema
+   labelCallback: Function, // (path, doc) -> String
+   // variable type of the changed. Useful for Date vs String
+   typeCallback: Function, // (path, doc) -> String
+   // user model to ref in the audit schema
+   modelUser: String,
+   // how to obtain the user that edited
+   userCallback: Function // (path, doc) -> User
+ }
 ```
 
 ## Usage / Example
 
 ```js
-audit(Schema, {
-modelName: "MyModelName",
-userName: 'UserModelName',
-labelCallback: function(path, doc) {
-return path.toUpperCase();
-},
-typeCallback: function(path, doc) {
-return "string";
-},
-userCallback: function(path, doc) {
-return doc.owner;
-}
-});
+ audit(Schema, {
+   modelName: "MyModelName",
+   userName: 'UserModelName',
+   labelCallback: function(path, doc) {
+     return path.toUpperCase();
+   },
+   typeCallback: function(path, doc) {
+     return "string";
+   },
+   userCallback: function(path, doc) {
+     return doc.owner;
+   }
+ });
 ```
 
 

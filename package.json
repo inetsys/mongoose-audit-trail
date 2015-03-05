@@ -1,13 +1,13 @@
 {
   "name": "mongoose-audit-trail",
-  "version": "0.0.1",
+  "version": "0.0.0",
   "description": "Audit-trail for mongoose models.",
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "git://github.com/llafuente/mongoose-audit-trail"
+    "url": "git://github.com/inetsys/mongoose-audit-trail"
   },
-  "homepage": "https://github.com/llafuente/mongoose-audit-trail",
+  "homepage": "https://github.com/inetsys/mongoose-audit-trail",
   "scripts": {
     "docr": "docr ./index.js --intro --append TODO --append LICENSE > README.md"
   },
@@ -15,6 +15,8 @@
     "mongoose",
     "plugin",
     "audit",
+    "audit trail",
+    "audit log",
     "version"
   ],
   "author": {

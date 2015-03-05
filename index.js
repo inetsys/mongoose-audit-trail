@@ -4,6 +4,8 @@
 * Record any field change made to a mongoose model,
 * manually, do not use pre/post hooks.
 *
+* Tested with mongoose 3.8.x
+*
 * Instance Methods added to the original schema:
 * * getAudit
 * * getAuditVersion
