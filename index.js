@@ -118,7 +118,9 @@ module.exports = function (schema, options) {
   function getAudit(callback) {
     var model = getModel(this.db);
 
-    var query = model.find({});
+    var query = model.find({
+      src: this._id
+    });
 
     if (options.userCallback) {
       query = query.populate("user");
@@ -139,6 +141,7 @@ module.exports = function (schema, options) {
     var model = getModel(this.db);
 
     var query = model.find({
+      src: this._id,
       src__v: v
     });
 
@@ -165,6 +168,7 @@ module.exports = function (schema, options) {
     var model = getModel(this.db);
 
     var query = model.find({
+      src: this._id,
       src__v: {"$gte": a, "$lt": b}
     });
 
@@ -186,7 +190,7 @@ module.exports = function (schema, options) {
   * @return {Array}
   */
   function getAuditDiffs(obj) {
-    return get_audit_diff(this.toJSON(), obj, this, options);
+    return get_audit_diff(obj, this.toJSON(), this, options);
   }
   /**
   * Save audit differences into mongo
