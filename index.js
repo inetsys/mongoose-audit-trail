@@ -28,6 +28,8 @@
 *   modelUser: String,
 *   // how to obtain the user that edited
 *   userCallback: Function // (path, doc) -> User
+*   // remove unwanted audit lines
+*   filterAuditCallback: Function, // (change, path, doc) -> Boolean
 * }
 * ```
 *
@@ -126,7 +128,9 @@ module.exports = function (schema, options) {
       query = query.populate("user");
     }
 
-    return query.exec(function (err, result) {
+    return query
+    .sort({created_at: -1})
+    .exec(function (err, result) {
       callback(err, result);
     });
   }
@@ -149,7 +153,9 @@ module.exports = function (schema, options) {
       query = query.populate("user");
     }
 
-    return query.exec(function (err, result) {
+    return query
+    .sort({created_at: -1})
+    .exec(function (err, result) {
       callback(err, result);
     });
   }
@@ -176,7 +182,9 @@ module.exports = function (schema, options) {
       query = query.populate("user");
     }
 
-    return query.exec(function (err, result) {
+    return query
+    .sort({created_at: -1})
+    .exec(function (err, result) {
       callback(err, result);
     });
   }
@@ -190,7 +198,7 @@ module.exports = function (schema, options) {
   * @return {Array}
   */
   function getAuditDiffs(obj) {
-    return get_audit_diff(obj, this.toJSON(), this, options);
+    return get_audit_diff(this.toJSON(), obj, this, options);
   }
   /**
   * Save audit differences into mongo
@@ -219,12 +227,11 @@ module.exports = function (schema, options) {
 
 var diff = require('deep-diff').diff;
 
-function get_audit_diff(after, before, doc, options) {
-  var differences;
+function get_audit_diff(before, after, doc, options, base_path) {
+  var differences = [],
+    base_path = base_path || [];
 
-  differences = diff(before, after);
-
-  differences = differences
+  diff(before, after)
   .filter(function (d) {
     // ignore some fields
     if (d.path.length === 1 && ['_id', '__v', 'updated_at', 'created_at'].indexOf(d.path[d.path.length - 1]) > -1) {
@@ -232,23 +239,7 @@ function get_audit_diff(after, before, doc, options) {
     }
 
     // path array is shared (reference) always manipulate the clone
-    var path = d.path.slice();
-
-    // type is required if labelCallback
-    if (options.labelCallback) {
-      d.label = options.labelCallback(path);
-
-      // if no label, ignore
-      if (!d.label) {
-        return false;
-      }
-    }
-
-    // type is optional even with typeCallback
-    if (options.typeCallback) {
-      d.type = options.typeCallback(path);
-    }
-
+    var path = base_path.concat(d.path);
 
     switch (d.kind) {
     case 'E':
@@ -270,9 +261,10 @@ function get_audit_diff(after, before, doc, options) {
 
     return true;
   })
-  .map(function (d) {
-    var path = d.path.slice(),
-      obj;
+  .forEach(function (d) {
+    var path = base_path.concat(d.path),
+      obj,
+      sub_differences = [];
 
     switch (d.kind) {
     case 'N':
@@ -292,6 +284,15 @@ function get_audit_diff(after, before, doc, options) {
         lhs: null,
         rhs: null // TODO this could be filled...
       };
+
+      var ref_obj = {};
+      Object.keys(d.item.rhs).forEach(function(k) {
+        ref_obj[k] = Array.isArray(d.item.rhs[k]) ? [] : {};
+      });
+
+      sub_differences = sub_differences.concat(
+        get_audit_diff(ref_obj, d.item.rhs, doc, options, path)
+      );
       break;
 
     case 'D':
@@ -317,7 +318,15 @@ function get_audit_diff(after, before, doc, options) {
       obj.user = options.userCallback(path, doc);
     }
 
-    return obj;
+    if (
+      (options.filterAuditCallback && options.filterAuditCallback(obj, path, doc))
+      ||
+      !options.filterAuditCallback
+    ) {
+      differences.push(obj);
+      differences = differences.concat(sub_differences);
+    }
+
   });
 
   //console.log("\n\n(audit) final differences\n", differences);
