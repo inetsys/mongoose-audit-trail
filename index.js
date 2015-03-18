@@ -281,7 +281,7 @@ function get_audit_diff(before, after, doc, options, base_path) {
       break;
 
     case 'A':
-      path.push(d.index);
+      path.push(parseInt(d.index, 10));
 
       if (d.item.kind != "D") {
         obj = {
