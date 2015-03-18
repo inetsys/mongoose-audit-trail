@@ -1,6 +1,6 @@
 {
   "name": "mongoose-audit-trail",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Audit-trail for mongoose models.",
   "main": "index.js",
   "repository": {
