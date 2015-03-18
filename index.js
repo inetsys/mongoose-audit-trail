@@ -193,6 +193,16 @@ module.exports = function (schema, options) {
   * Later that array should be sent to saveAuditDiffs when the object
   * it succesfully saved.
   *
+  *
+  * **Note**: Differences are filtered, some changes are
+  * discarded if both sides contains any of the following.
+  *
+  * * null
+  * * undefined
+  * * empty array
+  * * empty object
+  * * object with all values undefined/null
+  *
   * @name getAuditDiffs
   * @param {Object} obj object to compare
   * @return {Array}
@@ -223,6 +233,39 @@ module.exports = function (schema, options) {
   schema.methods.getAuditDiffs = getAuditDiffs;
   schema.methods.saveAuditDiffs = saveAuditDiffs;
 };
+
+// null
+// undefined
+// empty array
+// empty object
+// object with all values undefined/null
+function empty(obj) {
+  if (obj == null) {
+    return true;
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.length === 0;
+  }
+
+  if ("object" === typeof obj) {
+    var keys = Object.keys(obj);
+    if (keys.length === 0) {
+      return true;
+    }
+
+    var all_undef = true;
+    keys.forEach(function(k) {
+      if (obj[k] != null) {
+        all_undef = false;
+      }
+    });
+
+    return all_undef;
+  }
+
+  return false;
+}
 
 
 var diff = require('deep-diff').diff;
@@ -290,16 +333,7 @@ function get_audit_diff(before, after, doc, options, base_path) {
           rhs: null // TODO this could be filled...
         };
 
-        // check left and right are not both null/undefined
-        var all_nulls = true;
-        Object.keys(d.item.rhs).forEach(function(k) {
-          if (d.item.rhs[k] != null ||
-            (d.item.lhs != null && d.item.lhs[k] != null)) {
-            all_nulls = false;
-          }
-        });
-
-        if (all_nulls) { // all nulls ? do not audit anything
+        if (empty(d.lhs) && empty(d.rhs)) {
           break;
         }
 
@@ -316,6 +350,10 @@ function get_audit_diff(before, after, doc, options, base_path) {
 
       // jshint -W086
     case 'D':
+      if (empty(d.lhs) && empty(d.rhs)) {
+        return;
+      }
+
       obj = {
         action: 'delete',
         lhs: d.lhs,

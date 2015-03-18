@@ -28,6 +28,8 @@ options object:
    modelUser: String,
    // how to obtain the user that edited
    userCallback: Function // (path, doc) -> User
+   // remove unwanted audit lines
+   filterAuditCallback: Function, // (change, path, doc) -> Boolean
  }
 ```
 
@@ -100,6 +102,16 @@ Retrive all audit info for a given version range
 Return an array with all the differents found.
 Later that array should be sent to saveAuditDiffs when the object
 it succesfully saved.
+
+
+**Note**: Differences are filtered, some changes are
+discarded if both sides contains any of the following.
+
+* null
+* undefined
+* empty array
+* empty object
+* object with all values undefined/null
 
 *Parameters:*
 
