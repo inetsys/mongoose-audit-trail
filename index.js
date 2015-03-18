@@ -266,6 +266,10 @@ function get_audit_diff(before, after, doc, options, base_path) {
       obj,
       sub_differences = [];
 
+    //console.log(
+    //  require("util").inspect(d, {depth:null, colors:true})
+    //);
+
     switch (d.kind) {
     case 'N':
     case 'E':
@@ -285,6 +289,19 @@ function get_audit_diff(before, after, doc, options, base_path) {
           lhs: null,
           rhs: null // TODO this could be filled...
         };
+
+        // check left and right are not both null/undefined
+        var all_nulls = true;
+        Object.keys(d.item.rhs).forEach(function(k) {
+          if (d.item.rhs[k] != null ||
+            (d.item.lhs != null && d.item.lhs[k] != null)) {
+            all_nulls = false;
+          }
+        });
+
+        if (all_nulls) { // all nulls ? do not audit anything
+          break;
+        }
 
         var ref_obj = {};
         Object.keys(d.item.rhs).forEach(function(k) {
