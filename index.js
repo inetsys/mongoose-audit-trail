@@ -279,22 +279,25 @@ function get_audit_diff(before, after, doc, options, base_path) {
     case 'A':
       path.push(d.index);
 
-      obj = {
-        action: 'add',
-        lhs: null,
-        rhs: null // TODO this could be filled...
-      };
+      if (d.item.kind != "D") {
+        obj = {
+          action: 'add',
+          lhs: null,
+          rhs: null // TODO this could be filled...
+        };
 
-      var ref_obj = {};
-      Object.keys(d.item.rhs).forEach(function(k) {
-        ref_obj[k] = Array.isArray(d.item.rhs[k]) ? [] : {};
-      });
+        var ref_obj = {};
+        Object.keys(d.item.rhs).forEach(function(k) {
+          ref_obj[k] = Array.isArray(d.item.rhs[k]) ? [] : {};
+        });
 
-      sub_differences = sub_differences.concat(
-        get_audit_diff(ref_obj, d.item.rhs, doc, options, path)
-      );
-      break;
+        sub_differences = sub_differences.concat(
+          get_audit_diff(ref_obj, d.item.rhs, doc, options, path)
+        );
+        break;
+      }
 
+      // jshint -W086
     case 'D':
       obj = {
         action: 'delete',
@@ -304,6 +307,7 @@ function get_audit_diff(before, after, doc, options, base_path) {
 
       break;
     }
+    // jshint +W086
 
     obj.src = doc;
     obj.src__v = doc.__v;
