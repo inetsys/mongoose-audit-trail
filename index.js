@@ -348,6 +348,14 @@ function get_audit_diff(before, after, doc, options, base_path) {
         break;
       }
 
+      obj = {
+        action: 'delete',
+        lhs: null,
+        rhs: null
+      };
+
+      break;
+
       // jshint -W086
     case 'D':
       if (empty(d.lhs) && empty(d.rhs)) {
