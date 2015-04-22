@@ -333,7 +333,7 @@ function get_audit_diff(before, after, doc, options, base_path) {
           rhs: null // TODO this could be filled...
         };
 
-        if (empty(d.lhs) && empty(d.rhs)) {
+        if (empty(d.item.lhs) && empty(d.item.rhs)) {
           break;
         }
 
